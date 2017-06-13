@@ -1,0 +1,11 @@
+*.agdai
+*.chi
+*.chs.h
+*.glob
+*.hi
+*.o
+*.v.d
+*.vo
+Makefile.coq
+cabal-dev
+dist
