@@ -605,45 +605,10 @@ Section Names.
 
   End WFValue_Sec.
 
-  Section Pure_Sound_Sec.
-
-    Variable WFV : (WFValue_i unit -> Prop) -> WFValue_i unit -> Prop.
-    Variable funWFV : iFunctor WFV.
+  Section EvalSoundness.
 
     Variable WFVM : (WFValueM_i unit -> Prop) -> WFValueM_i unit -> Prop.
     Variable funWFVM : iFunctor WFVM.
-
-    Context {Reasonable_MT : Reasonable_Monad MT}.
-
-    Definition Pure_Sound_P (i : WFValueM_i unit) :=
-      forall T, wfvm_T _ i = return_ T ->
-        exists v : Value,
-          wfvm_v _ i = return_ (M := ME) v /\
-          WFValueC _ WFV tt v T.
-
-    Inductive Pure_Sound_Name := pure_sound_name.
-
-    Context {WFV_proj1_b_WFV :
-      iPAlgebra WFV_proj1_b_Name (WFV_proj1_b_P unit WFV) WFV}.
-
-    Global Instance Pure_Sound_WFVM_base :
-      iPAlgebra Pure_Sound_Name Pure_Sound_P (WFValueM_base unit WFV).
-    Proof.
-      econstructor.
-      unfold iAlgebra; intros; apply ind_alg_WFVM_base with (WFV := WFV);
-        try assumption; unfold Pure_Sound_P; intros.
-      (* WFVM_Return' *)
-      exists v; split; simpl in *; auto.
-      destruct H1 as [mt' mt'_eq]; subst.
-      destruct (fmap_exists _ _ _ _ _ H2) as [[T' T_eq] T'_eq].
-      simpl in *; subst; auto.
-      destruct T0 as [T0 T0_UP'].
-      destruct Sigma.
-      apply (WFV_proj1_b _ _ _ _ H0); simpl; auto.
-      (* WFVM_Untyped' *)
-      simpl in H0; apply sym_eq in H0.
-      apply FailMonad_Disc in H0; destruct H0; auto.
-    Qed.
 
     Inductive ES'_ExpName := es'_expname.
 
@@ -674,8 +639,6 @@ Section Names.
         repeat rewrite wf_malgebra; unfold mfold; apply H; auto.
     Qed.
 
-    Context {Pure_Sound_WFVM : iPAlgebra Pure_Sound_Name Pure_Sound_P WFVM}.
-
     Global Instance ConsExtensionUnit : ConsExtensionC unit :=
       { ConsExtension := fun _ _ => True }.
     Proof.
@@ -685,18 +648,7 @@ Section Names.
       eauto.
     Qed.
 
-    Theorem eval_Pure_Sound' :
-      forall (e : Exp) (T : DType),
-        typeof (proj1_sig e) = return_ T ->
-        exists v : Value,
-          evalM (proj1_sig e) = return_ (M := ME) v /\
-          WFValueC unit WFV tt v T.
-    Proof.
-      intro; apply (ifold_ WFVM _ (ip_algebra (iPAlgebra := Pure_Sound_WFVM)) _
-      (eval_soundness e tt)).
-    Qed.
-
-  End  Pure_Sound_Sec.
+  End EvalSoundness.
 
   Section BindRule.
 
