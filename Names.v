@@ -511,68 +511,6 @@ Section Names.
       Definition WFValueMC Sigma v T:= WFValueM (mk_WFValueM_i Sigma v T).
       Variable funWFVM : iFunctor WFVM.
 
-      Inductive WFValueM_base (A : WFValueM_i -> Prop) : WFValueM_i -> Prop :=
-      | WFVM_Return : forall Sigma v (T : DType) (mt : MT DType),
-        WFValueC Sigma v T ->
-        {mt' : MT {T' : DType | proj1_sig T = proj1_sig T'} &
-          fmap (@proj1_sig _ _) mt' = mt} ->
-        WFValueM_base A (mk_WFValueM_i Sigma (return_ v) mt)
-      | WFVM_Untyped : forall B Sigma me (mt : MT B),
-        WFValueM_base A (mk_WFValueM_i Sigma me (mt >> fail)).
-
-      Definition ind_alg_WFVM_base (P : WFValueM_i -> Prop)
-        (H_Return : forall Sigma v T mt,
-          WFValueC Sigma v T ->
-          {mt' : MT {T' : DType | proj1_sig T = proj1_sig T'} &
-            fmap (@proj1_sig _ _) mt' = mt} ->
-          P (mk_WFValueM_i Sigma (return_ v) mt))
-        (H_Untyped : forall B Sigma me mt,
-          P (mk_WFValueM_i Sigma me (mt >> fail)))
-        (i : WFValueM_i)
-        (e : WFValueM_base P i)
-        :
-        P i :=
-        match e in WFValueM_base _ i return P i with
-          | WFVM_Return Sigma v T mt WF_v_T WF_mt => H_Return Sigma v T mt WF_v_T WF_mt
-          | WFVM_Untyped B Sigma me mt => H_Untyped B Sigma me mt
-        end.
-
-      Definition WFVM_base_ifmap
-        (A B : WFValueM_i -> Prop)
-        (i : WFValueM_i)
-        (f : forall i, A i -> B i)
-        (wfvm_v : WFValueM_base A i)
-        :
-        WFValueM_base B i :=
-        match wfvm_v in WFValueM_base _ i return WFValueM_base B i with
-          | WFVM_Return Sigma v T mt WF_v_T WF_mt => WFVM_Return B Sigma v T mt WF_v_T WF_mt
-          | WFVM_Untyped C Sigma me mt => WFVM_Untyped B C Sigma me mt
-        end.
-
-      Global Instance iFun_WFVM_base : iFunctor WFValueM_base.
-      constructor 1 with (ifmap := WFVM_base_ifmap).
-      destruct a; simpl; intros; reflexivity.
-      destruct a; simpl; intros; auto.
-    Defined.
-
-    Lemma WFVM_Return_T : forall A Sigma v T,
-      WFValueC Sigma v T ->
-      WFValueM_base A (mk_WFValueM_i Sigma (return_ v) (return_ T)).
-    Proof.
-      intros; constructor 1 with (T := T); auto.
-      exists (return_ (exist (fun T' => proj1_sig T = proj1_sig T')
-        T (refl_equal (proj1_sig T)))).
-      rewrite fmap_m, <- left_unit; reflexivity.
-    Qed.
-
-    Lemma WFVM_Untyped_T : forall A Sigma v,
-      WFValueM_base A (mk_WFValueM_i Sigma (return_ v) fail).
-    Proof.
-      simpl; intros.
-      rewrite left_unit with (a := tt) (f := fun _ => fail).
-      intros; constructor 2.
-    Qed.
-
     Definition eval_soundness_P (e : Fix E) (e_UP' : Universal_Property'_fold e) :=
       forall Sigma, WFValueMC Sigma (evalM e) (typeof e).
 
@@ -656,10 +594,10 @@ Section Names.
     Context {TypContextCE : ConsExtensionC TypContext}.
 
     Variable WFV : (WFValue_i TypContext -> Prop) -> WFValue_i TypContext -> Prop.
-    Variable funWFV : iFunctor WFV.
+    Context {funWFV : iFunctor WFV}.
 
     Variable WFVM : (WFValueM_i TypContext -> Prop) -> WFValueM_i TypContext -> Prop.
-    Variable funWFVM : iFunctor WFVM.
+    Context {funWFVM : iFunctor WFVM}.
 
     Inductive wfvm_bind_Name : Set := wfvm_bind_name.
 
@@ -687,70 +625,6 @@ Section Names.
     Proof.
       eapply (ifold_ WFVM _ (ip_algebra (iPAlgebra := wfvm_bind_alg)) (mk_WFValueM_i _ Sigma mv mT) WFVM_mv_mT);
         eauto.
-    Qed.
-
-    Context {MT_eq_dec : forall (A : Set) (mta : MT A),
-      {exists a, mta = return_ a} + {mta = fail}}.
-    Context {Inj_MT : InjMonad MT}.
-    Context {Reasonable_MT : Reasonable_Monad MT}.
-
-    Context {WFV_proj1_b_WFV : iPAlgebra WFV_proj1_b_Name (WFV_proj1_b_P _ WFV) WFV}.
-    Context {Sub_WFVM_Base'_WFVM : Sub_iFunctor (WFValueM_base _ WFV) WFVM}.
-
-    Lemma wfvm_skip Sigma (me : ME Value) (mt : MT DType) (kt : DType -> MT DType)
-         (WFVM_me_kt : forall T, WFValueMC _ WFVM Sigma me (kt T)) :
-      WFValueMC _ WFVM Sigma me (mt >>= kt).
-    Proof.
-      destruct (MT_eq_dec _ mt) as [[T mt_eq] | mt_eq]; subst.
-      rewrite <- left_unit.
-      apply WFVM_me_kt.
-      rewrite bind_fail.
-      apply inject_i.
-      rewrite left_unit with (a := tt) (f := fun _ => fail).
-      constructor 2.
-    Qed.
-
-    Lemma wfvm_fail : forall Sigma ke,
-      WFValueM _ WFVM (mk_WFValueM_i _ Sigma ke fail).
-    Proof.
-      intros.
-      apply inject_i.
-      rewrite left_unit with (a := tt) (f := fun _ => fail).
-      constructor 2.
-    Qed.
-
-    Global Instance wfvm_bind_base' :
-      iPAlgebra wfvm_bind_Name wfvm_bind_P (WFValueM_base _ WFV).
-    Proof.
-      econstructor.
-      unfold iAlgebra; intros; apply ind_alg_WFVM_base with (WFV := WFV);
-        try assumption; unfold wfvm_bind_P; simpl; intros.
-      (* WFVM_Return' *)
-      destruct (MT_eq_dec _ mt) as [[T0 mt_eq] | mt_eq]; subst.
-      repeat rewrite <- left_unit; eapply WFVM_ke_kt; eauto.
-      apply ConsExtension_id.
-      destruct H1 as [mt' mt'_eq']; subst.
-      destruct (MT_eq_dec _ mt') as [[T' mt'_eq] | mt'_eq]; subst.
-      rewrite fmap_return in mt'_eq'.
-      apply inj_return in mt'_eq'; subst.
-      destruct T'.
-      destruct x.
-      apply (WFV_proj1_b TypContext WFV _ _ H0); simpl; auto.
-      destruct (fmap_exists _ _ _ _ _ mt'_eq') as [[T' T_eq] T'_eq].
-      simpl in *; subst; auto.
-      destruct T0.
-      apply (WFV_proj1_b TypContext WFV _ _ H0); simpl; auto.
-      rewrite bind_fail.
-      apply wfvm_fail.
-      (* WFVM_Untyped' *)
-      destruct (MT_eq_dec _ mt) as [[T0 mt_eq] | mt_eq]; subst.
-      unfold wbind; rewrite <- left_unit.
-      rewrite bind_fail.
-      apply wfvm_fail.
-      unfold wbind.
-      rewrite <- associativity.
-      rewrite bind_fail.
-      apply wfvm_fail.
     Qed.
 
   End BindRule.

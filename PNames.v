@@ -1,11 +1,12 @@
-Require Import FJ_tactics.
-Require Import Functors.
-Require Import List.
-Require Import Names.
 Require Import FunctionalExtensionality.
 Require Import Coq.Arith.EqNat.
 Require Import Coq.Bool.Bool.
+Require Import List.
+Require Import FJ_tactics.
+Require Import Functors.
 Require Import MonadLib.
+Require Import Names.
+Require Import EffPure.
 
 Section PNames.
 
@@ -431,8 +432,6 @@ Section PNames.
 
     Context {wfvm_bind_alg : iPAlgebra wfvm_bind_Name (wfvm_bind_P D V MT ME TypContext WFV WFVM) WFVM}.
     Context {WFV_proj1_b_WFV : iPAlgebra WFV_proj1_b_Name (WFV_proj1_b_P D V _ WFV) WFV}.
-
-    Context {Sub_WFVM_Base_WFVM : Sub_iFunctor (WFValueM_base D V MT ME _ WFV) WFVM}.
 
     Global Instance wfvm_bind_Bot :
       iPAlgebra wfvm_bind_Name (wfvm_bind_P D V MT ME TypContext WFV WFVM) WFValueM_Bot.
