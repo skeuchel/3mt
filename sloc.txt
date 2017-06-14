@@ -1,0 +1,68 @@
+     spec    proof comments
+      193       99        2 Framework/FJ_tactics.v
+      611      289       79 Framework/Functors.v
+     1350      201      242 Framework/MonadLib.v
+      355       94       52 Names.v
+      311      140       40 PNames.v
+     2820      823      415 total
+
+     spec    proof comments
+      140       85       11 Typing/EffExcept.v
+       83       59       13 Typing/EffPure.v
+      140       28       24 Typing/EffReader.v
+      120       22       18 Typing/EffState.v
+      483      194       66 total
+
+     spec    proof comments
+      528      110       48 Feature/Arith.v
+      593      122       53 Feature/Bool.v
+      353       60       31 Feature/Exception.v
+      836      169       71 Feature/Lambda.v
+      897      229       53 Feature/Ref.v
+      195       34        9 Feature/Lambda_Arith.v
+      199       30        9 Feature/Lambda_Bool.v
+      180       14        6 Feature/Lambda_Exception.v
+      267       51        9 Feature/Lambda_Ref.v
+     4048      819      289 total
+
+     spec    proof comments
+      204      234       14 ESound/ESoundERS.v
+      215       31       11 ESound/ESoundER.v
+      152      164       14 ESound/ESoundES.v
+       79       61        8 ESound/ESoundE.v
+       54       20       11 ESound/ESoundP.v
+      167      139       19 ESound/ESoundRS.v
+       83        0        8 ESound/ESoundR.v
+      114       70       15 ESound/ESoundS.v
+     1068      719      100 total
+
+     spec    proof comments
+       30        4        3 LSound/test_A.v
+       31       10        3 LSound/test_B.v
+       32       12        3 LSound/test_AB.v
+       40       13        3 LSound/test_R.v
+       42       16        3 LSound/test_AR.v
+       43       16        3 LSound/test_BR.v
+       43       22        3 LSound/test_AE.v
+       43       22        3 LSound/test_BE.v
+       44       25        3 LSound/test_ABE.v
+       45       18        3 LSound/test_BAR.v
+       60       20        3 LSound/test_RE.v
+       62       30        3 LSound/test_ARE.v
+       64       22        3 LSound/test_BARE.v
+       64       26        3 LSound/test_BRE.v
+       68       21        3 LSound/test_BL.v
+       69       21        3 LSound/test_AL.v
+       76       20        3 LSound/test_BAL.v
+       85       18        3 LSound/test_LR.v
+       92       18        3 LSound/test_ARL.v
+       93       18        3 LSound/test_BRL.v
+       95       18        3 LSound/test_ALE.v
+       97       18        3 LSound/test_BLE.v
+       99       18        3 LSound/test_BARL.v
+      103       18        3 LSound/test_BALE.v
+      120       18        3 LSound/test_LRE.v
+      129       18        3 LSound/test_ARLE.v
+      129       18        3 LSound/test_BRLE.v
+      136       18        3 LSound/test_BARLE.v
+     2034      516       84 total
